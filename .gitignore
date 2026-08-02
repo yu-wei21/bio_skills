@@ -1,0 +1,64 @@
+# macOS / editors
+.DS_Store
+._*
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.vscode/
+.idea/
+
+# Local credentials and machine-specific configuration
+.env
+.env.*
+!.env.example
+.Renviron
+*.pem
+*.key
+*.p12
+*.pfx
+.ssh/
+
+# Input data, generated results, logs, and temporary working directories
+# Keep small, versioned test fixtures outside these directories (for example tests/fixtures/).
+data/
+raw_data/
+results/
+output/
+logs/
+tmp/
+temp/
+scratch/
+cache/
+slurm-*.out
+slurm-*.err
+*.log
+
+# Large or binary bioinformatics objects generated during analysis
+*.rds
+*.RDS
+*.h5ad
+*.h5
+*.hdf5
+*.loom
+*.h5seurat
+*.qs
+*.qsave
+*.mtx
+*.mtx.gz
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.bam
+*.bai
+*.cram
+*.crai
+
+# Reproducible environments: retain lock/configuration files, ignore installed libraries
+renv/library/
+renv/staging/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
