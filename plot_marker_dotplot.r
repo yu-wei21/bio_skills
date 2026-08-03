@@ -1,22 +1,21 @@
 #!/usr/bin/env Rscript
 
-# 输入：Seurat RDS；marker CSV/TSV 至少含 panel、marker 两列，所有 marker 必须在指定
-#       assay 中存在，分组列由 --group-by 指定。
-# 输出：以 --output-prefix 为前缀生成 marker DotPlot PDF/PNG 与作图数据 CSV；默认前缀为
-#       output/marker_dotplot。
-# 示例：Rscript plot_marker_dotplot.r --seurat-rds input/seurat.rds --markers marker_panels.csv
+# 输入：
+#   1. Seurat RDS
+#   2. marker CSV/TSV：至少含 panel、marker 两列，所有 marker 必须存在于指定 assay 中
+# 输出：
+#   1. 以 --output-prefix 为前缀的 marker DotPlot PDF
+#   2. 以 --output-prefix 为前缀的 marker DotPlot PNG
+#   3. 以 --output-prefix 为前缀的作图数据 CSV
+# 示例命令：Rscript plot_marker_dotplot.r --seurat-rds input/seurat.rds --markers marker_panels.csv
 #
-# Seurat marker DotPlot：命令行版本
+# Seurat marker DotPlot 命令行版本
 #
 # marker 文件为 CSV/TSV，至少含两列：panel,marker。
 # 文件行顺序决定分面顺序及各分面内 marker 顺序；可选 panel_order、marker_order
 # 两列进行显式排序。每个 marker 只能出现一次。
 #
-# 最小示例：同上。
-# 可选参数 --group-by、--assay、--output-prefix 未提供时，分别默认为
-# celltype、RNA、output/marker_dotplot。
-#
-# 查看全部参数：Rscript plot_marker_dotplot.r --help
+# 注意事项：--group-by、--assay、--output-prefix 的默认值依次为 celltype、RNA、output/marker_dotplot；可用 Rscript plot_marker_dotplot.r --help 查看全部参数。
 
 suppressPackageStartupMessages({
   library(Seurat)

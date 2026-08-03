@@ -1,17 +1,18 @@
 #!/usr/bin/env Rscript
 
-## 输入为 CSV 或制表符分隔的文本文件：每行一个样本；样本列和分组列由参数指定；
-## 其余列均视为细胞类型丰度。细胞类型在图中的顺序与输入列顺序一致，分组顺序与
-## 输入文件中首次出现的顺序一致。
-## 输出：默认写入 output/plot-celltype-boxplot/；生成以输入文件名为前缀的长表 CSV、
-##       分组细胞类型丰度箱线图 PNG 与 PDF。
-##
-## 示例：
+## 输入：
+##   1. CSV 或制表符分隔文本：每行一个样本，样本列和分组列由参数指定，其余列为细胞类型丰度
+## 输出：
+##   1. output/plot-celltype-boxplot/ 下以输入文件名为前缀的长表 CSV
+##   2. output/plot-celltype-boxplot/ 下以输入文件名为前缀的分组细胞类型丰度箱线图 PNG
+##   3. output/plot-celltype-boxplot/ 下以输入文件名为前缀的分组细胞类型丰度箱线图 PDF
+## 示例命令：
 ## Rscript plot-celltype-boxplot.r \
 ##   --input celltype_abundance.csv \
 ##   --sample-col sample_id \
 ##   --group-col group \
 ##   --output-dir output/celltype-boxplot
+## 注意事项：细胞类型顺序与输入列顺序一致，分组顺序与输入文件中首次出现的顺序一致。
 
 suppressPackageStartupMessages({
   library(ggplot2)

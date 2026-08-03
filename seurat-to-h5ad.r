@@ -1,25 +1,27 @@
 #!/usr/bin/env Rscript
-# 输入：已完成 NormalizeData 的 Seurat v4/v5 RDS；可用 --assay 指定待导出的 assay。
-# 输出：默认在输入 RDS 同目录生成同名 .h5ad；可用 --output 指定路径。
-# 示例：Rscript seurat-to-h5ad.r --input data/seurat.rds --output output/seurat.h5ad --assay RNA
+# 输入：
+#   1. 已完成 NormalizeData 的 Seurat v4/v5 RDS
+# 输出：
+#   1. 默认在输入 RDS 同目录生成的同名 .h5ad 文件，或由 --output 指定的文件
+# 示例命令：Rscript seurat-to-h5ad.r --input data/seurat.rds --output output/seurat.h5ad --assay RNA
 # 注意事项：需由 reticulate 绑定一个安装 anndata 的 Python；导出的 adata.X 是 data layer
 #           （归一化且通常对数转换后的矩阵），不是原始 counts。
 #
 # 通用脚本：Seurat RDS -> h5ad（reticulate + anndata 直连，不依赖 sceasy）
 #
-# 特点:
+# 特点：
 #   - Seurat v4 (legacy Assay) 与 v5 (Assay5, 多 layer) 均兼容；
 #     Assay5 多 layer 先 JoinLayers 合并再导出
-#   - adata.X = data layer（normalized log-transformed data，infercnvpy/scanpy 可直接用）
+#   - adata.X = data layer（归一化且通常经对数转换的数据，infercnvpy/scanpy 可直接使用）
 #   - 默认导出 DefaultAssay（通常 RNA），--assay 可指定
 #   - obs = meta.data（因子列转字符）；var = assay 的 feature 元数据
-#   - Python 绑定顺序: RETICULATE_PYTHON -> CONDA_PREFIX -> conda env "seurat"，
+#   - Python 绑定顺序：RETICULATE_PYTHON -> CONDA_PREFIX -> conda env "seurat"，
 #     避免 reticulate 自动探测到错误的解释器
 #
-# 用法:
+# 用法：
 #   Rscript seurat-to-h5ad.r --input <seurat.rds> [--output <out.h5ad>] [--assay <name>]
 #
-# 依赖:
+# 依赖：
 #   R: Seurat, reticulate, Matrix
 #   Python (conda env seurat): anndata
 
@@ -49,7 +51,7 @@ parse_args <- function(argv) {
 
 # ---------- Python 绑定 ----------
 
-# 绑定流程: 先探测候选 python（RETICULATE_PYTHON -> CONDA_PREFIX/bin/python ->
+# 绑定流程：先探测候选 Python（RETICULATE_PYTHON -> CONDA_PREFIX/bin/python ->
 # conda env "seurat"）中哪个装有 anndata，确定后才调用一次 use_python ——
 # reticulate 一旦初始化某个 python 便无法在同一会话切换，所以探测用 system2 直查，
 # 不经过 reticulate。conda env 定位不依赖 PATH 里的 conda 命令，
@@ -63,7 +65,7 @@ py_has_anndata <- function(py) {
 
 find_env_python <- function(env = "seurat") {
   hits <- character(0)
-  # 1) conda environments.txt（conda 官方记录所有 env 路径，格式为裸目录）
+# 1) conda environments.txt（conda 官方记录所有 env 路径，格式为裸目录）
   envs_txt <- file.path(path.expand("~"), ".conda", "environments.txt")
   if (file.exists(envs_txt)) {
     hits <- readLines(envs_txt, warn = FALSE)
@@ -162,7 +164,7 @@ if (inherits(assay_obj, "Assay5")) {
   }
 }
 
-# data matrix（genes x cells），转置为 cells x genes（anndata 标准方向）
+# data 矩阵（基因×细胞），转置为细胞×基因（anndata 标准方向）
 message("2. Extract data matrix (layer = data, genes x cells) ...")
 data_mat <- GetAssayData(assay_obj, layer = "data")
 if (is.null(data_mat) || length(data_mat) == 0) {
@@ -172,7 +174,7 @@ message("   Dim: ", nrow(data_mat), " x ", ncol(data_mat),
         " | sparse: ", is(data_mat, "dgCMatrix") || is(data_mat, "dgTMatrix"))
 data_mat_t <- Matrix::t(data_mat)  # dgCMatrix, cells x genes
 
-# obs: cell-level metadata
+# obs：细胞级 metadata
 message("3. Build obs / var ...")
 obs_df <- seurat@meta.data
 # 因子列转字符，避免 reticulate 转换问题
@@ -182,7 +184,7 @@ for (col in colnames(obs_df)) {
   }
 }
 
-# var: gene-level metadata（Assay5 用 [[]]，Assay 用 @meta.features）
+# var：基因级 metadata（Assay5 用 [[]]，Assay 用 @meta.features）
 if (inherits(assay_obj, "Assay5")) {
   var_df <- assay_obj[[]]
 } else {

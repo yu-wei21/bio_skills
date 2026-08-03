@@ -1,20 +1,13 @@
 #!/usr/bin/env Rscript
 
-# Pooled-cell Ro/e analysis
-#
-# Usage:
-#   Rscript Roe.r <counts.csv> [output_dir]
-#
-# Input CSV:
-#   - rows: cell types
-#   - first column: unique cell type symbols/labels
-#   - remaining columns: study groups
-#   - values: non-negative integer cell counts
-#
-# Outputs:
-#   <input_stem>.roe.xlsx
-#   <input_stem>.roe.heatmap.pdf
-#   <input_stem>.roe.heatmap.png
+# 汇总细胞 Ro/e 分析
+# 输入：
+#   1. CSV 文件：行为细胞类型，首列为唯一细胞类型标识，后续列为研究组的非负整数细胞计数
+# 输出：
+#   1. [output_dir] 或输入文件目录下的 <input_stem>.roe.xlsx
+#   2. [output_dir] 或输入文件目录下的 <input_stem>.roe.heatmap.pdf
+#   3. [output_dir] 或输入文件目录下的 <input_stem>.roe.heatmap.png
+# 示例命令：Rscript plot-Roe.r <counts.csv> [output_dir]
 
 required_packages <- c("ComplexHeatmap", "openxlsx", "ragg")
 missing_packages <- required_packages[
@@ -33,7 +26,7 @@ if (length(missing_packages) > 0) {
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 1 || length(args) > 2) {
   stop(
-    "Usage: Rscript Roe.r <counts.csv> [output_dir]",
+    "Usage: Rscript plot-Roe.r <counts.csv> [output_dir]",
     call. = FALSE
   )
 }
@@ -205,9 +198,8 @@ for (sheet_name in names(sheet_data)) {
 
 openxlsx::saveWorkbook(workbook, excel_file, overwrite = TRUE)
 
-# Match the reference pooled-cell workflow: assign each cell type to the group
-# with its largest Ro/e value, then place later input groups first. Ties are
-# resolved in favor of the first group, matching which.max().
+# 与参考的汇总细胞流程一致：将每个细胞类型分配给其 Ro/e 值最大的组，
+# 再将输入中靠后的组置于前方。若存在并列，按 which.max() 的行为选择首个组。
 preferred_group <- max.col(roe, ties.method = "first")
 row_order <- order(preferred_group, decreasing = TRUE, method = "radix")
 plot_roe_raw <- roe[row_order, , drop = FALSE]

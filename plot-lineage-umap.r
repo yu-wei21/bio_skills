@@ -4,11 +4,11 @@
 ##   2. 亚群映射 CSV：第一列 celltype（原亚群名，须唯一且存在于对象），第二列 display_name
 ##      （含 marker 的展示名，如 AR+ / CD4_Tn_CCR7 风格）；行序即集群编号顺序
 ##      （第 1 行 = 编号 1，依此类推）；可选第三列 color（十六进制颜色，不填则用内置默认调色板）
-## 输出：默认写入 output/plot-lineage-umap/，以输入 RDS 文件名为前缀生成：
-##   - 两页 PDF（第 1 页 UMAP 编号图，第 2 页编号+展示名图例；由 Ghostscript gs 合并）
-##   - 第 1 页对应 PNG
-## 示例：Rscript plot-lineage-umap.r --input data/annotated.rds --mapping mapping.csv
-##       Rscript plot-lineage-umap.r --input data/annotated.rds --mapping mapping.csv \
+## 输出：
+##   1. output/plot-lineage-umap/ 下以输入 RDS 文件名为前缀的两页 PDF（第 1 页 UMAP 编号图，第 2 页编号与展示名图例）
+##   2. output/plot-lineage-umap/ 下以输入 RDS 文件名为前缀的第 1 页对应 PNG
+## 示例命令：Rscript plot-lineage-umap.r --input data/annotated.rds --mapping mapping.csv
+##   Rscript plot-lineage-umap.r --input data/annotated.rds --mapping mapping.csv \
 ##         --celltype-col celltype --title "PCa subtypes" --output-dir output/custom
 ## 注意事项：对象中未出现在映射表中的 celltype 会以灰色 "Other" 显示并提示；
 ##           系统需提供 Ghostscript 命令 gs 用于合并 PDF。
@@ -128,7 +128,7 @@ if (length(unmapped_obs) > 0) {
           paste(unmapped_obs, collapse = ", "))
 }
 
-## cluster number (character, 1..N)；未映射的细胞标为 "Other"
+## 集群编号（字符型，1..N）；未映射的细胞标为 "Other"
 obj$cluster_num <- as.character(unname(cluster_num[ct_values]))
 obj$cluster_num[is.na(obj$cluster_num)] <- "Other"
 ## 因子水平 = 编号 1..N + Other（保证 DimPlot 的 cols 一一对应）

@@ -1,10 +1,16 @@
-## 输入：Seurat RDS（RNA data/data.*层，feature名为gene symbol）、无缺失的细胞类型metadata列名、含gene_name/gene_biotype列的注释CSV。
-## 输出：output/presto/下以输入RDS文件名开头的完整DEG/ORA XLSX、背景CSV及逐细胞类型GSEA CSV。
-## 示例：Rscript presto.r cancer.rds celltype gtf.csv
+## 输入：
+##   1. Seurat RDS（RNA data/data.* 层，feature 名为 gene symbol）
+##   2. 无缺失的细胞类型 metadata 列名
+##   3. 含 gene_name、gene_biotype 列的注释 CSV
+## 输出：
+##   1. output/presto/ 下以输入 RDS 文件名为前缀的完整 DEG/ORA XLSX
+##   2. ORA 背景 CSV
+##   3. 逐细胞类型 GSEA 排序 CSV
+## 示例命令：Rscript presto.r cancer.rds celltype gtf.csv
 
 ## 脚本目的：对 Seurat 对象中指定细胞类型列进行 presto 差异分析
-##           匹配 protein-coding gene，输出差异基因列表
-##           同时准备 ORA (top100 logFC) 和 GSEA (全基因 ranked list) 的输入文件
+##           匹配蛋白编码基因，输出差异基因列表
+##           同时准备 ORA（前 100 个 logFC）和 GSEA（全基因排序列表）的输入文件
 ##
 ## 后续分析：
 ##   ORA:  Rscript ORA.r <输出_xlsx> SYMBOL <输出_universe.csv> --gmt-dir=<GMT目录>
@@ -130,7 +136,7 @@ if (anyNA(celltype_values) || any(!nzchar(celltype_values))) {
 ct_levels <- unique(celltype_values)
 message("  Cell types (", length(ct_levels), "): ", paste(sort(ct_levels), collapse = ", "))
 
-## ---- 读入 GTF，筛选 protein-coding genes ----
+## ---- 读入 GTF，筛选蛋白编码基因 ----
 message("Loading GTF reference ...")
 gtf <- fread(gtf_file, data.table = FALSE)
 required_gtf_cols <- c("gene_name", "gene_biotype")
@@ -179,7 +185,7 @@ degs <- wilcoxauc(X_matrix, y)
 message("  Total rows: ", nrow(degs))
 rm(y)
 
-## ---- 匹配 protein-coding genes ----
+## ---- 匹配蛋白编码基因 ----
 message("Filtering to protein-coding genes ...")
 degs_pc <- degs[degs$feature %in% pc_genes, ]
 pc_universe <- base::intersect(rownames(X_matrix), pc_genes)
@@ -279,7 +285,7 @@ rm(wb, top100_list)
 invisible(gc())
 
 ## ---- 准备 GSEA 输入：每个细胞类型全基因按 logFC 降序排列 ----
-## gsea.r 期望的输入格式：CSV，第一列 gene，第二列连续排序值（已降序）
+## GSEA.r 期望的输入格式：CSV，第一列 gene，第二列连续排序值（已降序）
 message("Preparing GSEA inputs (full gene list ranked by logFC) ...")
 gsea_files <- character(length(degs_list))
 names(gsea_files) <- names(degs_list)
@@ -293,7 +299,7 @@ for (ct in names(degs_list)) {
       !duplicated(gsea_df$gene) &
       is.finite(gsea_df$logFC),
   ]
-  ## 按 logFC 降序排列（gsea.r 内会再排一次，这里先排好）
+  ## 按 logFC 降序排列（GSEA.r 内会再排一次，这里先排好）
   gsea_df <- gsea_df[order(gsea_df$logFC, decreasing = TRUE), ]
   ct_safe <- gsea_file_stems[[ct]]
   gsea_files[[ct]] <- paste0(output_prefix, "_GSEA_", ct_safe, ".csv")

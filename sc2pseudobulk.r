@@ -1,10 +1,14 @@
-## 输入：Seurat RDS（RNA counts/counts.*为非负整数，基因名为唯一标准SYMBOL；orig.ident和指定细胞大类列无NA/空值）。
-## 输出：output/sc2pseudobulk/下以输入RDS文件名开头的all-cell及逐细胞大类gene×sample CSV。
+## 输入：
+##   1. Seurat RDS：RNA counts/counts.* 为非负整数，基因名为唯一标准 SYMBOL，orig.ident 和指定细胞大类列无 NA 或空值
+##   2. 细胞大类 metadata 列名
+## 输出：
+##   1. output/sc2pseudobulk/ 下以输入 RDS 文件名为前缀的 all-cell gene×sample CSV
+##   2. output/sc2pseudobulk/ 下以输入 RDS 文件名为前缀的逐细胞大类 gene×sample CSV
 ## 说明：样本×细胞大类组合中无细胞的样本，会从对应细胞大类的CSV列中剔除（不保留0填充列），
 ##       以避免下游DESeq2因样本总counts为0而失败；剔除情况会在运行信息中说明。
 ##       DESeq2.r 会自动取"表达矩阵列 ∩ group.csv 样本"的交集进行分析，
 ##       因此 group.csv 无需按细胞大类裁剪，保留全部样本即可。
-## 示例：Rscript sc2pseudobulk.r data/pbmc.rds celltype
+## 示例命令：Rscript sc2pseudobulk.r data/pbmc.rds celltype
 
 ## CSV列名保留原始orig.ident。
 
@@ -13,7 +17,7 @@ suppressPackageStartupMessages({
   library(Matrix)
 })
 
-## ----------------------------- Parameters ---------------------------------
+## ------------------------------ 参数 ------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) != 2) {
@@ -42,7 +46,7 @@ if (!dir.exists(output_dir)) {
 }
 output_dir <- normalizePath(output_dir, mustWork = TRUE)
 
-## ----------------------------- Helpers ------------------------------------
+## ---------------------------- 辅助函数 ----------------------------------
 sanitize_filename <- function(label) {
   filename <- gsub("[/\\\\]", "_", label)
   filename <- gsub("[<>:\"|?*]", "_", filename)
@@ -84,7 +88,7 @@ write_pseudobulk_csv <- function(pseudobulk, output_csv, expected_samples) {
   utils::write.csv(output_df, output_csv, row.names = FALSE, quote = TRUE)
 }
 
-## ----------------------------- Read and Validate ---------------------------
+## ---------------------------- 读取并验证 --------------------------------
 message("Reading Seurat object: ", input_rds)
 sc_all <- readRDS(input_rds)
 
@@ -239,7 +243,7 @@ if (any(renamed_files)) {
   )
 }
 
-## ----------------------------- Pseudobulk ---------------------------------
+## --------------------------- 伪 bulk 聚合 --------------------------------
 message("Creating all-cell pseudobulk counts.")
 all_pseudobulk <- aggregate_by_sample(
   counts = counts,

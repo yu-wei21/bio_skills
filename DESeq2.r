@@ -1,13 +1,19 @@
 ## 输入：
 ##   1. gene×sample 非负整数 count 矩阵（首列为唯一 SYMBOL）
 ##   2. 分组表（前两列为文本型唯一样本 ID 和分组，且恰好两组）
-##   3. 明确的分子组和分母组
-##   4. 人类 GTF 注释 CSV（含gene_name/gene_biotype）和下游分析使用的GMT目录
+##   3. 分子组名称
+##   4. 分母组名称
+##   5. 人类 GTF 注释 CSV（含 gene_name、gene_biotype 列）
+##   6. 下游分析使用的 GMT 目录
 ## 样本筛选：取 count 矩阵列与分组表样本的交集（两侧独有样本均忽略并提示）。
 ##   即分组表可包含 count 矩阵中不存在的样本（如 sc2pseudobulk 因该细胞类型无细胞
 ##   而剔除的样本），count 矩阵也可包含分组表中无临床信息的样本；分析只用交集。
-## 输出：output/DESeq2/下以count矩阵文件名开头的DESeq2结果、PCA/VST及ORA/GSEA输入。
-## 示例：
+## 输出：
+##   1. output/DESeq2/ 下以 count 矩阵文件名和比较名称为前缀的 DESeq2 结果
+##   2. PCA 与 VST 图形 PDF/PNG
+##   3. ORA 背景与基因集输入文件
+##   4. GSEA 排序输入文件
+## 示例命令：
 ##   Rscript DESeq2.r counts.csv group.csv treated control genes.csv data/gmt
 
 suppressPackageStartupMessages({
@@ -333,7 +339,7 @@ res_df <- res_df[, c("gene", setdiff(colnames(res_df), "gene"))]
 
 write.csv(res_df, deg_file, row.names = FALSE)
 
-## ORA input: significant upregulated genes, ranked by log2 fold change.
+## ORA 输入：显著上调基因，按 log2 fold change 排序。
 ora_df <- res_df[
   !is.na(res_df$gene) &
     res_df$gene != "" &
@@ -360,7 +366,7 @@ addWorksheet(ora_wb, ora_sheet)
 writeData(ora_wb, ora_sheet, ora_input)
 saveWorkbook(ora_wb, ora_file, overwrite = TRUE)
 
-## ORA universe: tested protein-coding SYMBOL with a finite raw p value.
+## ORA 背景：已检验、具有有限原始 p 值的蛋白编码 SYMBOL。
 ora_universe <- unique(as.character(
   res_df$gene[
     !is.na(res_df$gene) &
@@ -371,7 +377,7 @@ ora_universe <- unique(as.character(
 ))
 write.csv(data.frame(gene = ora_universe), ora_universe_file, row.names = FALSE)
 
-## GSEA input: tested protein-coding SYMBOL ranked by unshrunk log2 fold change.
+## GSEA 输入：已检验的蛋白编码 SYMBOL，按未收缩的 log2 fold change 排序。
 gsea_df <- res_df[
   !is.na(res_df$gene) &
     res_df$gene != "" &

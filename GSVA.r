@@ -1,6 +1,10 @@
-## 输入：gene×sample非负数值表达矩阵CSV（首列为唯一gene symbol且与GMT一致、无NA）、表达类型（TPM/RPKM/CPM/count）和标准GMT文件。
-## 输出：output/GSVA/下以表达矩阵文件名开头的GSVA评分CSV。
-## 示例：Rscript GSVA.r input_expression.csv TPM pathway.gmt
+## 输入：
+##   1. gene×sample 非负数值表达矩阵 CSV（首列为唯一 gene symbol、与 GMT 一致且无 NA）
+##   2. 表达类型：TPM、RPKM、CPM 或 count
+##   3. 标准 GMT 文件
+## 输出：
+##   1. output/GSVA/ 下以表达矩阵文件名为前缀的 GSVA 评分 CSV
+## 示例命令：Rscript GSVA.r input_expression.csv TPM pathway.gmt
 
 ## GSVA分析脚本
 
@@ -8,7 +12,7 @@ library(GSVA)
 library(tidyverse)
 library(clusterProfiler)
 
-## args
+## 参数解析
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 3) {
     stop("Usage: Rscript GSVA.r <expression.csv> <TPM|RPKM|CPM|count> <pathway.gmt>")
@@ -30,7 +34,7 @@ output_gsva <- file.path(
 matrix <- read.csv(input_rna, row.names = 1, check.names = FALSE) %>% as.matrix()
 matrix %>% head()
 
-## 读取gmt文件
+## 读取 GMT 文件
 pathway <- read.gmt(input_gmt)
 pathway %>% head()
 pathway <- split(pathway$gene, pathway$term)
@@ -61,5 +65,5 @@ gsva_mat %>% head()
 ## 导出结果
 write.csv(gsva_mat, file = output_gsva, row.names = TRUE)
 
-## END OF SCRIPT
+## 脚本结束
 cat("GSVA analysis completed successfully.\n")

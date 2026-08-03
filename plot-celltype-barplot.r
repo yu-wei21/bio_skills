@@ -1,13 +1,14 @@
 #!/usr/bin/env Rscript
 
-## 输入：Seurat RDS 文件。对象的 metadata 中必须包含由 --sample-col 和
-## --celltype-col 指定的两列；两列均不可含 NA 或空字符串。样本和细胞类型
-## 的因子水平（若已设置）决定图中与结果表中的排列顺序，否则按首次出现顺序排列。
-## 输出：默认写入 output/plot-celltype-barplot/。以输入 RDS 文件名（去除 .rds）
-## 为前缀，生成样本内细胞类型比例 CSV、PNG 和 PDF 堆叠柱状图。
-## 示例：Rscript plot-celltype-barplot.r --input data/example.rds \\
+## 输入：
+##   1. Seurat RDS：metadata 必须含 --sample-col、--celltype-col 指定的两列，且无 NA 或空字符串
+## 输出：
+##   1. output/plot-celltype-barplot/ 下以输入 RDS 文件名为前缀的样本内细胞类型比例 CSV
+##   2. output/plot-celltype-barplot/ 下以输入 RDS 文件名为前缀的堆叠柱状图 PNG
+##   3. output/plot-celltype-barplot/ 下以输入 RDS 文件名为前缀的堆叠柱状图 PDF
+## 示例命令：Rscript plot-celltype-barplot.r --input data/example.rds \\
 ##   --sample-col sample --celltype-col major_celltype
-## 可选：--output-dir output/custom-directory
+## 注意事项：样本和细胞类型的因子水平（若已设置）决定图表和结果表的排列顺序，否则按首次出现顺序排列；可用 --output-dir 指定输出目录。
 
 suppressPackageStartupMessages({
   library(Seurat)

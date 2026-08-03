@@ -1,10 +1,17 @@
-## 输入：含单一gene×cell原始UMI counts层的Seurat RDS；可选标准10X raw目录或含Seurat/SCE/count矩阵的背景RDS，基因ID须一致且包含人类T/B/Mono/NK marker symbol用于QC。
-## 输出：output/DecontX/下以输入RDS文件名开头的校正RDS、metadata CSV、QC PDF和sessionInfo TXT。
-## 示例：Rscript DecontX.r sample.rds --background=sample/outs/raw_feature_bc_matrix
+## 输入：
+##   1. 含单一 gene×cell 原始 UMI counts 层的 Seurat RDS
+##   2. 可选背景：标准 10X raw 目录，或含 Seurat/SCE/count 矩阵的背景 RDS
+## 输出：
+##   1. output/DecontX/ 下以输入 RDS 文件名为前缀的校正 Seurat RDS
+##   2. 校正后 metadata CSV
+##   3. QC PDF
+##   4. sessionInfo TXT
+## 示例命令：Rscript DecontX.r sample.rds --background=sample/outs/raw_feature_bc_matrix
+## 注意事项：输入与背景的基因 ID 必须一致；QC 使用人类 T/B/Mono/NK marker symbol。
 
 ## 推荐按单个样本/单个 10X channel 分别运行，不建议直接对合并对象运行。
 
-## DecontX 运行阶段:
+## DecontX 运行阶段：
 ## 1. Cell Ranger/STARsolo 等完成 cell calling 之后
 ## 2. Seurat 正式归一化、整合、聚类、注释和差异分析之前
 

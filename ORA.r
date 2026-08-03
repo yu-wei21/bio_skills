@@ -1,11 +1,17 @@
-## 输入：基因集XLSX（每个sheet仅读第一列；第一列列名是基因集名称，下面各行为与gene_format一致的SYMBOL/ENTREZID）、SYMBOL格式GMT目录（文件名须符合gmt_registry），以及背景CSV（第一列SYMBOL）或含gene_name/gene_biotype的注释CSV。
-## 输出：output/ORA/下以基因集XLSX文件名开头的ORA结果XLSX及图形PDF/PNG。
-## 示例：Rscript ORA.r data/gene_sets.xlsx SYMBOL data/universe.csv --gmt-dir=data/gmt
+## 输入：
+##   1. 基因集 XLSX（每个 sheet 仅读第一列；列名为基因集名称，成员与 gene_format 一致）
+##   2. gene_format：SYMBOL 或 ENTREZID
+##   3. SYMBOL 格式 GMT 目录（文件名须符合 gmt_registry）
+##   4. 背景 CSV（第一列 SYMBOL）或含 gene_name、gene_biotype 列的注释 CSV
+## 输出：
+##   1. output/ORA/ 下以基因集 XLSX 文件名为前缀的 ORA 结果 XLSX
+##   2. 富集图形 PDF/PNG
+## 示例命令：Rscript ORA.r data/gene_sets.xlsx SYMBOL data/universe.csv --gmt-dir=data/gmt
 
 ## 脚本目的：对多个基因集合进行ORA过表达富集分析（compareCluster）
 ## 数据库：GO (BP/CC/MF 合并), KEGG, Reactome, Hallmark, MSigDB c1-c9
 ## 全部使用本地 GMT + clusterProfiler::enricher，零联网依赖
-## 未提供背景CSV时，使用GTF中的protein-coding genes。
+## 未提供背景 CSV 时，使用 GTF 中的蛋白编码基因。
 
 suppressPackageStartupMessages({
   library(clusterProfiler)
@@ -265,7 +271,7 @@ results <- lapply(names(gmt_loaded), function(db) {
 names(results) <- names(gmt_loaded)
 
 ## ---- 后处理 ----
-## Hallmark: 去掉 HALLMARK_ 前缀，下划线换空格，转 Title Case
+## Hallmark：去掉 HALLMARK_ 前缀，下划线换空格，转标题式大小写
 fmt_hallmark <- function(x) {
   sub("^HALLMARK_", "", x) %>%
     gsub("_", " ", .) %>%
@@ -276,7 +282,7 @@ if (!is.null(results[["Hallmark"]]) && nrow(as.data.frame(results[["Hallmark"]])
     fmt_hallmark(results[["Hallmark"]]@compareClusterResult$Description)
 }
 
-## Reactome: 去掉 REACTOME_ 前缀（如有），下划线换空格，转 Title Case
+## Reactome：去掉 REACTOME_ 前缀（如有），下划线换空格，转标题式大小写
 if (!is.null(results[["Reactome"]]) && nrow(as.data.frame(results[["Reactome"]])) > 0) {
   results[["Reactome"]]@compareClusterResult$Description <-
     results[["Reactome"]]@compareClusterResult$Description %>%

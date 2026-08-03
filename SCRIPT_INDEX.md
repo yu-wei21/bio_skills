@@ -31,7 +31,7 @@
 |---|---|---|---|
 | [plot-celltype-barplot.r](plot-celltype-barplot.r) | Seurat RDS、样本列、细胞类型列 | 每样本比例 CSV | 堆叠柱图 PNG/PDF |
 | [plot-celltype-boxplot.r](plot-celltype-boxplot.r) | 样本×细胞类型丰度表、样本列、组别列 | 长表 CSV | 分组箱线图 PNG/PDF |
-| [plot-Roe.r](plot-Roe.r) | 细胞类型×组别的非负整数细胞计数 CSV | Ro/e XLSX | Ro/e 热图 PNG/PDF |
+| [plot-Roe.r](plot-Roe.r) | 细胞类型×组别的非负整数细胞计数 CSV | 默认写入输入文件目录的 Ro/e XLSX | Ro/e 热图 PNG/PDF |
 
 ## 样本级表达与差异分析
 
@@ -49,12 +49,11 @@
 |---|---|---|---|
 | [ORA.r](ORA.r) | 多基因集 XLSX、背景/GTF、本地 GMT | 多基因集 ORA XLSX | 富集 PDF/PNG |
 | [GSEA.r](GSEA.r) | gene symbol 排序表、本地 GMT 目录 | GSEA XLSX | 富集 PDF/PNG |
-| [GSEA.dotplot.pair.r](GSEA.dotplot.pair.r) | GSEA XLSX；内置 FDG 主题通路 | 指定通路结果图 | NES 配对点图 PDF/PNG |
+| [plot-GSEA-dotplot.r](plot-GSEA-dotplot.r) | GSEA XLSX；内置 FDG 主题通路 | 内置 FDG 通路的 NES 配对点图 PDF/PNG | NES 配对点图 PDF/PNG |
 | [GSVA.r](GSVA.r) | gene×sample 表达矩阵、表达类型、GMT | GSVA 评分 CSV | 无 |
-| [GSVA_2_limma.r](GSVA_2_limma.r) | GSVA 评分与含 `IDbn`/`FDG_groupe` 的临床 CSV | limma 差异通路 CSV | 无 |
-| [GSVA_3_wilcox.r](GSVA_3_wilcox.r) | GSVA 评分与含 `IDbn`/`FDG_groupe` 的临床 CSV | Wilcoxon 差异通路 CSV | 无 |
+| [GSVA_2_limma.r](GSVA_2_limma.r) | GSVA 评分与含 `IDbn`/`FDG_groupe` 的临床 CSV；项目特异分组映射 | limma 差异通路 CSV | 无 |
 
-`GSEA.dotplot.pair.r` 是项目主题图；使用前确认其内置通路列表符合当前问题。
+`plot-GSEA-dotplot.r` 是项目主题图；使用前确认其内置通路列表符合当前问题。
 
 ## 格式转换
 
@@ -65,6 +64,8 @@
 ## 验证状态与维护
 
 - 2026-08-03 已对除 soupX.r 外全部脚本基于子集数据实测（子集对象 5188 细胞，FDG 分组）；测试报告见 `output/test_run/TEST_REPORT.md`（测试产物由用户手动清理）。
-- 实测中发现并修复的问题：GSVA.r 旧 API（gsva() 旧签名在 GSVA≥2.0 defunct）与 check.names 样本 ID 改写、GSVA_2/3 越界调试打印与 check.names、DecontX.r 的 Assays 命名空间遮蔽。详情见测试报告。
+- 实测中发现并修复的问题：GSVA.r 旧 API（gsva() 旧签名在 GSVA≥2.0 defunct）与 check.names 样本 ID 改写、GSVA_2 越界调试打印与 check.names、DecontX.r 的 Assays 命名空间遮蔽。详情见测试报告。
+- 2026-08-04 维护：重命名 `plot-GSEA-dotplot.r`，删除 `GSVA_3_wilcox.r`；当前共 18 个可执行 R 脚本。
+- 本索引尚未逐包完成官方教程的 API 复核；候选新增流程须在完成该复核后才可写入仓库。
 - 每日 05:00 自动扫描会更新本页，最多提议 2 个新增通用流程；新建候选脚本由用户决定是否保留。
 - 运行环境请参阅 [分析环境配置.md](分析环境配置.md)；注释参考见 [细胞分群注释.md](细胞分群注释.md)；跨脚本背景见 [CONTEXT.md](CONTEXT.md)。

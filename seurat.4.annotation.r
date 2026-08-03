@@ -1,12 +1,15 @@
-## 输入：已归一化的Seurat RDS（RNA data/data.*层，feature名为gene symbol），且metadata含无缺失的RNA_snn_res.0.5聚类列。
-## 输出：output/seurat.4.annotation/下以输入RDS文件名开头的marker panel及top-marker heatmap PDF/PNG。
-## 示例：Rscript seurat.4.annotation.r data/pbmc.rds
+## 输入：
+##   1. 已归一化 Seurat RDS：RNA data/data.* 层的 feature 名为 gene symbol，metadata 含无缺失的 RNA_snn_res.0.5 聚类列
+## 输出：
+##   1. output/seurat.4.annotation/ 下以输入 RDS 文件名为前缀的 marker panel PDF/PNG
+##   2. output/seurat.4.annotation/ 下以输入 RDS 文件名为前缀的 top-marker heatmap PDF/PNG
+## 示例命令：Rscript seurat.4.annotation.r data/pbmc.rds
 
 library(Seurat)
 library(tidyverse)
 library(viridis)
 
-##  args
+## 参数解析
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 1) {
   stop("Usage: Rscript seurat.4.annotation.r <input.rds>")
@@ -17,12 +20,12 @@ dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 input_tag <- tools::file_path_sans_ext(basename(file.sc))
 file.out <- file.path(output_dir, input_tag)
 cat("file is : ", file.sc, "\n")
-## umap plot by resolution
+## 按分辨率绘制 UMAP
 
-## read file
+## 读取文件
 sc <- readRDS(file.sc)
 
-## Step 1. 固定当前聚类身份
+## 步骤 1：固定当前聚类身份
 ## 后续所有 DotPlot / marker 统计 / DEG 计算都基于这一列 cluster 身份展开。
 ## 这里先把 cluster 转成按出现顺序排列的 factor，保证作图时行顺序稳定。
 ## -------------------------------------------------------------------------
@@ -31,7 +34,7 @@ Idents(sc) <- "RNA_snn_res.0.5"
 cluster_col <- "RNA_snn_res.0.5"
 
 ## -------------------------------------------------------------------------
-## Step 2. 定义用于注释的 marker 面板
+## 步骤 2：定义用于注释的 marker 面板
 ## 最外层 list 代表不同主题的图：
 ##   1) all_markers: 全局大类群快速浏览
 ##   2) *_marker: 某一谱系内部的亚群/状态 marker
@@ -166,7 +169,7 @@ marker_panels <- list(
 )
 
 ## -------------------------------------------------------------------------
-## Step 3. 准备 bubble heatmap 的公共参数
+## 步骤 3：准备气泡热图的公共参数
 ## 这里使用 ComplexHeatmap 自定义“圆点热图”，目的是实现：
 ##   1) cluster 在 y 轴
 ##   2) marker 在 x 轴
@@ -215,7 +218,7 @@ lgd_list <- list(
 )
 
 # --------------------------------------------------------------------------
-# Step 4. 预计算一次 DotPlot 数据，再按 panel 切片复用
+# 步骤 4：预计算一次 DotPlot 数据，再按 panel 切片复用
 # 这样避免在 for 循环里对每个 panel 重复跑 DotPlot，提高大对象时的速度。
 # --------------------------------------------------------------------------
 marker_feature_order <- unique(unlist(lapply(marker_panels, unlist, use.names = FALSE), use.names = FALSE))
@@ -223,12 +226,12 @@ marker_feature_order <- marker_feature_order[marker_feature_order %in% rownames(
 dotplot_df_all <- DotPlot(sc, features = marker_feature_order)$data
 
 # --------------------------------------------------------------------------
-# Step 5. 逐个 marker panel 出图
+# 步骤 5：逐个 marker panel 出图
 # 每轮循环做的事情是：
 #   1) 取出当前 panel 的基因和分组
 #   2) 从预计算 DotPlot 结果里切出当前 panel 的数据
 #   3) 整理成表达矩阵和比例矩阵
-#   4) 用 ComplexHeatmap 画成分组 bubble heatmap
+#   4) 用 ComplexHeatmap 画成分组气泡热图
 # --------------------------------------------------------------------------
 for (i in seq_along(marker_panels)) {
   marker_df <- prepare_marker_panel(marker_panels[[i]])
@@ -331,9 +334,9 @@ for (i in seq_along(marker_panels)) {
 }
 
 ## -------------------------------------------------------------------------
-## Step 6. 计算每个 cluster 的 top DEGs
+## 步骤 6：计算每个 cluster 的 top DEG
 ## 前面的 marker 面板是“人工指定 marker”视角；
-## 这里转为“数据驱动的 cluster 特异基因”视角，补充做一张 top DEG heatmap。
+## 这里转为“数据驱动的 cluster 特异基因”视角，补充绘制一张 top DEG 热图。
 ## -------------------------------------------------------------------------
 library(presto)
 
@@ -376,8 +379,8 @@ markers.top15 <- markers %>%
 sc <- ScaleData(sc, features = markers.top15$feature)
 
 # --------------------------------------------------------------------------
-# Step 7. 输出 top marker heatmap
-# 这一部分和前面的 bubble heatmap 互补：
+# 步骤 7：输出 top marker 热图
+# 这一部分和前面的气泡热图互补：
 #   前者强调“已知 marker 是否符合注释预期”
 #   这里强调“每个 cluster 自动找出的 top 基因长什么样”
 # --------------------------------------------------------------------------

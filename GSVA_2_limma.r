@@ -1,6 +1,10 @@
-## 输入：GSVA评分CSV（首列唯一通路名，其余列为样本数值评分）和临床CSV（IDbn唯一且完整匹配样本列；FDG_groupe取0/2且两组均存在）。
-## 输出：output/GSVA_2_limma/下以GSVA评分文件名开头的limma差异结果CSV。
-## 示例：Rscript GSVA_2_limma.r output/GSVA/input_expression_TPM_pathway_GSVA_result.csv data/clinical.csv
+## 输入：
+##   1. GSVA 评分 CSV（首列为唯一通路名，其余列为样本数值评分）
+##   2. 临床 CSV（IDbn 唯一且完整匹配样本列；FDG_groupe 取 0/2 且两组均存在）
+## 输出：
+##   1. output/GSVA_2_limma/ 下以 GSVA 评分文件名为前缀的 limma 差异结果 CSV
+## 示例命令：Rscript GSVA_2_limma.r output/GSVA/input_expression_TPM_pathway_GSVA_result.csv data/clinical.csv
+## 注意事项：项目特异脚本；仅比较 FDG_groupe 为 0/2 的样本（映射为 Low/High）。
 
 library(limma)
 library(tidyverse)

@@ -1,6 +1,10 @@
-## 输入：带表头的CSV/TSV/TXT基因排序表（前两列为与GMT一致的gene symbol和有限数值排序值）及含标准GMT文件的基因集目录。
-## 输出：output/GSEA/下以排序表文件名开头的GSEA结果XLSX及图形PDF/PNG。
-## 示例：Rscript GSEA.r data/gene_list.csv data/gmt
+## 输入：
+##   1. 带表头的 CSV/TSV/TXT 基因排序表（前两列为与 GMT 一致的 gene symbol 和有限数值排序值）
+##   2. 含标准 GMT 文件的基因集目录
+## 输出：
+##   1. output/GSEA/ 下以排序表文件名为前缀的 GSEA 结果 XLSX
+##   2. 富集图形 PDF/PNG
+## 示例命令：Rscript GSEA.r data/gene_list.csv data/gmt
 
 ## 脚本目的：对基因表达数据进行GSEA富集分析
 ## GMT基因集使用gene symbol。
@@ -15,7 +19,7 @@ suppressPackageStartupMessages({
     library(tidyverse)
 })
 
-## read files
+## 读取输入文件
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 2) {
     stop("Usage: Rscript GSEA.r <ranked_table> <gmt_dir>")
@@ -31,7 +35,7 @@ input_tag <- tools::file_path_sans_ext(basename(data_file))
 output_prefix <- file.path(output_dir, input_tag)
 data <- fread(data_file, data.table = FALSE)
 
-## prepare data
+## 准备数据
 ## 两列，第一列为基因名，第二列为排序值（大到小）
 if (ncol(data) < 2) {
     stop("Gene ranking file must contain at least two columns: gene and ranking value.")
@@ -52,7 +56,7 @@ if (length(gene_list) < 10) {
     stop("At least 10 unique ranked genes are required for GSEA.")
 }
 
-## read gmt file
+## 读取 GMT 文件
 if (!dir.exists(gmt_dir)) {
     stop("GMT directory does not exist: ", gmt_dir)
 }
@@ -72,7 +76,7 @@ if (n_overlap == 0) {
     stop("No ranked gene IDs overlap the GMT files; check that both use the same SYMBOL system.")
 }
 
-## GSEA analysis
+## GSEA 分析
 set.seed(666)
 gsea_results <- mclapply(gmt_list, function(gmt) {
     gsea_result <- GSEA(gene_list, TERM2GENE = gmt, pvalueCutoff = 0.05)
@@ -80,7 +84,7 @@ gsea_results <- mclapply(gmt_list, function(gmt) {
 }, mc.cores = 4)
 names(gsea_results) <- names(gmt_list)
 
-## save results
+## 保存结果
 gsea_tables <- lapply(gsea_results, as.data.frame)
 write.xlsx(gsea_tables, file = paste0(output_prefix, "_gsea_results.xlsx"), overwrite = TRUE)
 
@@ -101,7 +105,7 @@ if (is.null(gsea_results_df) || nrow(gsea_results_df) == 0) {
         ylim(-1, 1) +
         theme_void()
 } else {
-    ## X轴标题改为Title Case
+    ## X 轴标题改为标题式大小写
     gsea_results_df$Description <- gsub("_", " ", gsea_results_df$Description)
     gsea_results_df$Description <- str_to_title(gsea_results_df$Description)
     gsea_results_df$Description <- str_trunc(gsea_results_df$Description, width = 60, ellipsis = "...")

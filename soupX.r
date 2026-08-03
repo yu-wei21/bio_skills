@@ -1,13 +1,20 @@
-## 输入：raw及filtered标准10X目录（matrix、features/genes、barcodes；基因顺序一致、filtered barcode为raw子集，并含HBB/IGKC/PTPRC/KLK3/EPCAM）；可选样本名。
-## 输出：output/soupX/下以样本名开头的污染率CSV、校正对比PDF/PNG及校正后Seurat RDS。
-## 示例：Rscript soupX.r data/sample01/outs/raw_feature_bc_matrix data/sample01/outs/filtered_feature_bc_matrix sample01
+## 输入：
+##   1. raw 标准 10X 目录（matrix、features/genes、barcodes）
+##   2. filtered 标准 10X 目录（matrix、features/genes、barcodes）
+##   3. 可选样本名
+## 输出：
+##   1. output/soupX/ 下以样本名为前缀的污染率 CSV
+##   2. 校正前后对比 PDF/PNG
+##   3. 校正后的 Seurat RDS
+## 示例命令：Rscript soupX.r data/sample01/outs/raw_feature_bc_matrix data/sample01/outs/filtered_feature_bc_matrix sample01
+## 注意事项：raw 和 filtered 的基因顺序必须一致，filtered barcode 必须为 raw 子集；QC 依赖 HBB、IGKC、PTPRC、KLK3、EPCAM。
 
 library(Seurat)
 library(SoupX)
 library(tidyverse)
 
 
-## args 参数
+## 参数解析
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 2 || length(args) > 3) {
     stop(
