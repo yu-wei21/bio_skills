@@ -26,8 +26,9 @@ output_gsva <- file.path(
 )
 
 ## 读取表达矩阵文件
-matrix <- read.csv(input_rna, row.names = 1) %>% as.matrix()
-matrix[1:5, 1:5] %>% head()
+## check.names=FALSE 保留原始样本 ID（如含 - 的样本名，避免被改写成 QXH.G 导致下游匹配失败）
+matrix <- read.csv(input_rna, row.names = 1, check.names = FALSE) %>% as.matrix()
+matrix %>% head()
 
 ## 读取gmt文件
 pathway <- read.gmt(input_gmt)
@@ -35,19 +36,24 @@ pathway %>% head()
 pathway <- split(pathway$gene, pathway$term)
 
 ## GSVA分析
+## GSVA >= 2.0 使用 gsvaParam() 参数对象（旧签名 gsva(expr=, gset.idx.list=) 已 defunct）
 if (input_style == "TPM" | input_style == "RPKM" | input_style == "CPM") {
     matrix <- log2(matrix + 1)
-    matrix[1:5, 1:5] %>% head()
+    matrix %>% head()
     gsva_mat <- gsva(
-        expr = matrix,
-        gset.idx.list = pathway,
-        kcdf = "Gaussian" # "Gaussian" for logCPM,logRPKM,logTPM, "Poisson" for counts
+        gsvaParam(
+            exprData = matrix,
+            geneSets = pathway,
+            kcdf = "Gaussian" # "Gaussian" for logCPM,logRPKM,logTPM, "Poisson" for counts
+        )
     )
 } else if (input_style == "count") {
     gsva_mat <- gsva(
-        expr = matrix,
-        gset.idx.list = pathway,
-        kcdf = "Poisson" # "Gaussian" for logCPM,logRPKM,logTPM, "Poisson" for counts
+        gsvaParam(
+            exprData = matrix,
+            geneSets = pathway,
+            kcdf = "Poisson" # "Gaussian" for logCPM,logRPKM,logTPM, "Poisson" for counts
+        )
     )
 }
 gsva_mat %>% head()

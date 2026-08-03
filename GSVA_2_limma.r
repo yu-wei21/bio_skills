@@ -17,13 +17,13 @@ input_tag <- tools::file_path_sans_ext(basename(gsva_file))
 output_file <- file.path(output_dir, paste0(input_tag, "_limma_result.csv"))
 
 ## 读取GSVA结果
-gsva_mat <- read.csv(gsva_file, row.names = 1)
-gsva_mat[1:5, 1:5] %>% head()
+## check.names=FALSE 保留原始样本 ID，确保与 clinical CSV 的 IDbn 精确匹配
+gsva_mat <- read.csv(gsva_file, row.names = 1, check.names = FALSE)
+gsva_mat %>% head()
 
 ## 读取临床信息
 clinical <- read.csv(clinical_file)
-clinical$IDbn <- gsub("fpou", "TEP", clinical$IDbn)
-clinical[1:5, 1:5] %>% head()
+clinical %>% head()
 
 ## 提取FDG_groupe中0,2样本
 clinical <- clinical %>%
@@ -32,12 +32,12 @@ clinical <- clinical %>%
         FDG_groupe == "0" ~ "Low",
         FDG_groupe == "2" ~ "High"
     ))
-clinical[1:5, 1:5] %>% head()
+clinical %>% head()
 
 ## 提取GSVA评分中的0,2样本
 gsva_mat <- gsva_mat %>%
     dplyr::select(any_of(clinical$IDbn))
-gsva_mat[1:5, 1:5] %>% head()
+gsva_mat %>% head()
 
 ## 构建设计矩阵
 factor <- factor(clinical$FDG_groupe)

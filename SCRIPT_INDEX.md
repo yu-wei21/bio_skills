@@ -23,7 +23,7 @@
 |---|---|---|---|
 | [seurat.4.annotation.r](seurat.4.annotation.r) | 已归一化 Seurat RDS，含 `RNA_snn_res.0.5` | marker 结果 | marker panel 与 top-marker heatmap PDF/PNG |
 | [plot_marker_dotplot.r](plot_marker_dotplot.r) | Seurat RDS、含 `panel,marker` 的 CSV/TSV | 作图数据 CSV | marker DotPlot PDF/PNG |
-| [plot-lineage-umap.r](plot-lineage-umap.r) | 5 个预设谱系 Seurat RDS；需修改脚本内路径和映射 | 合并谱系图 | 两页 lineage UMAP PDF |
+| [plot-lineage-umap.r](plot-lineage-umap.r) | 已注释 Seurat RDS、celltype→display_name 映射 CSV（行序=集群编号） | 编号图例 | lineage UMAP 两页 PDF + PNG |
 
 ## 细胞组成与比例展示
 
@@ -64,6 +64,7 @@
 
 ## 验证状态与维护
 
-- 本次索引仅基于静态阅读与脚本头注释整理，尚未使用真实数据逐一运行，也未逐包完成官方教程的 API 复核。
+- 2026-08-03 已对除 soupX.r 外全部脚本基于子集数据实测（子集对象 5188 细胞，FDG 分组）；测试报告见 `output/test_run/TEST_REPORT.md`（测试产物由用户手动清理）。
+- 实测中发现并修复的问题：GSVA.r 旧 API（gsva() 旧签名在 GSVA≥2.0 defunct）与 check.names 样本 ID 改写、GSVA_2/3 越界调试打印与 check.names、DecontX.r 的 Assays 命名空间遮蔽。详情见测试报告。
 - 每日 05:00 自动扫描会更新本页，最多提议 2 个新增通用流程；新建候选脚本由用户决定是否保留。
 - 运行环境请参阅 [分析环境配置.md](分析环境配置.md)；注释参考见 [细胞分群注释.md](细胞分群注释.md)；跨脚本背景见 [CONTEXT.md](CONTEXT.md)。

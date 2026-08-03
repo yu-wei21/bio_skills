@@ -18,17 +18,17 @@ input_tag <- tools::file_path_sans_ext(basename(gsva_file))
 output_file <- file.path(output_dir, paste0(input_tag, "_wilcox_result.csv"))
 
 ## 读取GSVA结果
-gsva_mat <- read.csv(gsva_file, row.names = 1)
+## check.names=FALSE 保留原始样本 ID，确保与 clinical CSV 的 IDbn 精确匹配
+gsva_mat <- read.csv(gsva_file, row.names = 1, check.names = FALSE)
 gsva_mat <- gsva_mat %>%
     t() %>%
     as.data.frame() %>%
     rownames_to_column(var = "IDbn")
-gsva_mat[1:5, 1:5] %>% head()
+gsva_mat %>% head()
 
 ## 读取临床信息
 clinical <- read.csv(clinical_file)
-clinical$IDbn <- gsub("fpou", "TEP", clinical$IDbn)
-clinical[1:5, 1:5] %>% head()
+clinical %>% head()
 
 ## 提取FDG_groupe中0,2样本
 clinical <- clinical %>%
@@ -37,13 +37,13 @@ clinical <- clinical %>%
         FDG_groupe == "0" ~ "Low",
         FDG_groupe == "2" ~ "High"
     ))
-clinical[1:5, 1:5] %>% head()
+clinical %>% head()
 
 ## 提取GSVA评分中的0,2样本
 data <- clinical %>%
     dplyr::select(any_of(c("IDbn", "FDG_groupe"))) %>%
     left_join(gsva_mat, by = "IDbn")
-data[1:5, 1:5] %>% head()
+data %>% head()
 
 ## 逐个通路进行差异分析
 colnames(data) <- gsub("\\/", "", colnames(data))
@@ -62,7 +62,7 @@ res <- lapply(var, function(x) {
     return(res)
 })
 res <- do.call(rbind, res)
-res[1:5, 1:5] %>% head()
+res %>% head()
 
 ## 导出结果
 write.csv(res, file = output_file, row.names = FALSE)

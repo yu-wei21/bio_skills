@@ -74,7 +74,8 @@ output_qc_pdf <- paste0(output_prefix, "_decontX_qc.pdf")
 output_session <- paste0(output_prefix, "_decontX_sessionInfo.txt")
 
 get_counts_from_seurat <- function(seu, assay = "RNA") {
-    if (!assay %in% Assays(seu)) {
+    ## 显式 SeuratObject::Assays，避免被 decontX 间接加载的 SummarizedExperiment::Assays 遮蔽
+    if (!assay %in% SeuratObject::Assays(seu)) {
         stop("Seurat 对象中未找到 assay: ", assay, call. = FALSE)
     }
 
