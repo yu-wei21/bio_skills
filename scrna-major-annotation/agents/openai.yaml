@@ -1,0 +1,6 @@
+interface:
+  display_name: "scRNA 人类大类注释"
+  short_description: "三轮以内的人类 scRNA 质控、重聚类与人工审批大类注释"
+  default_prompt: "Use $scrna-major-annotation to run or resume the human/GRCh38 major-cell QC and annotation workflow from workflow_state.json."
+policy:
+  allow_implicit_invocation: true

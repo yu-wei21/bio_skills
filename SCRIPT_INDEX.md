@@ -13,8 +13,8 @@
 
 | 脚本 | 功能与最小输入 | 主输出 | 图形产物 |
 |---|---|---|---|
-| [soupX.r](soupX.r) | raw 与 filtered 10X 目录；估计并校正环境 RNA | 污染率 CSV、校正 Seurat RDS | 校正对比 PDF/PNG |
-| [DecontX.r](DecontX.r) | 含原始 UMI counts 的单样本 Seurat RDS；可选 raw 背景 | 校正 RDS、细胞 metadata、sessionInfo | QC PDF |
+| [DecontX.r](scrna-major-annotation/scripts/DecontX.r) | `seurat-qc-metrics.R` 实际生成的项目级 RDS（当前为 `<project>.qc-metrics.rds`）；按 `orig.ident` 单样本建模并行，可选逐样本 raw 背景表 | original/corrected 两个独立 Seurat RDS（各自 RNA 为实际分析 counts，均含污染比例）、双分支 manifest/review、逐细胞/样本摘要、sessionInfo | 每样本 marker 校正前/后 PDF/PNG（含上皮与成纤维 markers）；污染比例可进入 Round 1 人工阈值审批但无自动 cutoff；两个分支仅并行完成 Round 1，人工选择后单分支继续 |
+| [scDblFinder.r](scDblFinder.r) | 含原始 counts 的 Seurat RDS、捕获批次列；可选初步聚类列 | 含 score/class 的 Seurat RDS、逐细胞/汇总 CSV、sessionInfo | score 分布 PDF/PNG |
 | [seurat-to-h5ad.r](seurat-to-h5ad.r) | Seurat v4/v5 RDS；可选 assay | AnnData `.h5ad` | 无 |
 
 ## 注释、标记与谱系可视化
@@ -31,6 +31,7 @@
 |---|---|---|---|
 | [plot-celltype-barplot.r](plot-celltype-barplot.r) | Seurat RDS、样本列、细胞类型列 | 每样本比例 CSV | 堆叠柱图 PNG/PDF |
 | [plot-celltype-boxplot.r](plot-celltype-boxplot.r) | 样本×细胞类型丰度表、样本列、组别列 | 长表 CSV | 分组箱线图 PNG/PDF |
+| [propeller.r](propeller.r) | 已注释 Seurat RDS、样本/分组/细胞类型列（每组至少 2 个生物学样本） | 细胞类型比例差异检验、样本比例、组样本数 CSV、sessionInfo | 无 |
 | [plot-Roe.r](plot-Roe.r) | 细胞类型×组别的非负整数细胞计数 CSV | 默认写入输入文件目录的 Ro/e XLSX | Ro/e 热图 PNG/PDF |
 
 ## 样本级表达与差异分析
@@ -63,9 +64,10 @@
 
 ## 验证状态与维护
 
-- 2026-08-03 已对除 soupX.r 外全部脚本基于子集数据实测（子集对象 5188 细胞，FDG 分组）；测试报告见 `output/test_run/TEST_REPORT.md`（测试产物由用户手动清理）。
+- 2026-08-04：`scrna-major-annotation/scripts/DecontX.r` 已按 Bioconductor decontX 官方教程/API 复核，并接入该 skill 的 QC 状态链。现输出 original/corrected 双对象，矫正分支重算 count 相关 QC，两个分支独立完成 Round 1 后由人工选择；Seurat v5 聚类显式检查 split layers，并在 marker/保存前检查 JoinLayers。已完成 R 语法与 workflow 静态验证；当前环境未安装 `decontX`，尚未完成真实数据端到端运行。
+- 2026-08-03 曾对当时除 soupX.r 外的全部脚本基于子集数据实测（子集对象 5188 细胞，FDG 分组）；测试报告见 `output/test_run/TEST_REPORT.md`（测试产物由用户手动清理）。
 - 实测中发现并修复的问题：GSVA.r 旧 API（gsva() 旧签名在 GSVA≥2.0 defunct）与 check.names 样本 ID 改写、GSVA_2 越界调试打印与 check.names、DecontX.r 的 Assays 命名空间遮蔽。详情见测试报告。
-- 2026-08-04 维护：重命名 `plot-GSEA-dotplot.r`，删除 `GSVA_3_wilcox.r`；当前共 18 个可执行 R 脚本。
-- 本索引尚未逐包完成官方教程的 API 复核；候选新增流程须在完成该复核后才可写入仓库。
+- 2026-08-04 每日扫描：新增 `scDblFinder.r`（双细胞判定）与 `propeller.r`（样本级细胞组成差异检验）；两者依据官方 vignette 的当前 API 编写，并完成静态语法/帮助文本检查，尚未以真实数据实测。随后按用户要求删除 `soupX.r`；当前共 19 个可执行 R 脚本。
+- 已完成 `scDblFinder` 与 `speckle` 候选流程的官方教程 API 复核；其他既有脚本尚未逐包复核。
 - 每日 05:00 自动扫描会更新本页，最多提议 2 个新增通用流程；新建候选脚本由用户决定是否保留。
 - 运行环境请参阅 [分析环境配置.md](分析环境配置.md)；注释参考见 [细胞分群注释.md](细胞分群注释.md)；跨脚本背景见 [CONTEXT.md](CONTEXT.md)。
